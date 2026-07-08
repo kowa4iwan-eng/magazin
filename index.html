@@ -25,7 +25,6 @@
       <p id="heroText">Каталог, категорії, атрибути, кошик і швидке оформлення замовлення.</p>
       <div class="hero-actions">
         <a class="primary-link" href="#catalog">Дивитися товари</a>
-        <a class="secondary-link" href="admin.html">Відкрити адмін-панель</a>
       </div>
       <input type="text" id="searchInput" placeholder="Пошук товару..." oninput="renderProducts()" />
     </div>
@@ -34,10 +33,35 @@
   <main id="catalog">
     <section class="section-title">
       <h2>Каталог товарів</h2>
-      <p>Фільтруйте за категоріями, шукайте товари і додавайте в кошик.</p>
+      <p>Ціни за замовчуванням у гривнях. Можна перемкнути на долар або євро.</p>
     </section>
 
-    <div id="categoryFilters" class="filters"></div>
+    <div class="shop-toolbar">
+      <div id="categoryFilters" class="filters"></div>
+      <div class="filter-box">
+        <label>Валюта</label>
+        <select id="currencySelect" onchange="setCurrency(this.value)">
+          <option value="UAH">₴ Гривня</option>
+          <option value="USD">$ Долар</option>
+          <option value="EUR">€ Євро</option>
+        </select>
+      </div>
+      <div class="filter-box">
+        <label>Сортування</label>
+        <select id="sortSelect" onchange="renderProducts()">
+          <option value="default">За замовчуванням</option>
+          <option value="cheap">Спочатку дешевші</option>
+          <option value="expensive">Спочатку дорожчі</option>
+          <option value="name">За назвою</option>
+        </select>
+      </div>
+      <div class="filter-box">
+        <label>Ціна до, ₴</label>
+        <input id="maxPriceInput" type="number" placeholder="Напр. 2000" oninput="renderProducts()" />
+      </div>
+      <label class="check-filter"><input id="stockOnlyInput" type="checkbox" onchange="renderProducts()" /> Лише в наявності</label>
+    </div>
+
     <div id="products" class="products"></div>
   </main>
 
@@ -60,7 +84,7 @@
       <button class="close" onclick="toggleCart()">×</button>
       <h2>Ваш кошик</h2>
       <div id="cartItems"></div>
-      <h3>Разом: <span id="totalPrice">0</span> €</h3>
+      <h3>Разом: <span id="totalPrice">0 ₴</span></h3>
 
       <input id="clientName" placeholder="Ваше імʼя" />
       <input id="clientPhone" placeholder="Телефон" />
