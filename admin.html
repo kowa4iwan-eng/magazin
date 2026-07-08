@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Адмін-панель — BOBRO Shop</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+  <div class="admin-wrap">
+    <section class="admin-hero">
+      <div>
+        <h1>⚙️ Адмін-панель магазину</h1>
+        <p>Додавайте товари, категорії, атрибути і міняйте контакти без редагування коду.</p>
+      </div>
+      <a class="primary-link" href="index.html">← На сайт</a>
+    </section>
+
+    <div class="notice">
+      Це демо-адмінка для GitHub Pages. Дані зберігаються у браузері на цьому компʼютері. Для справжньої адмінки для всіх користувачів потрібен сервер або база даних.
+    </div>
+
+    <div class="admin-grid">
+      <section class="admin-card">
+        <h2>🏪 Налаштування магазину</h2>
+        <input id="shopNameInput" placeholder="Назва магазину" />
+        <input id="heroTitleInput" placeholder="Заголовок головної сторінки" />
+        <textarea id="heroTextInput" placeholder="Текст на головній сторінці"></textarea>
+        <div class="row">
+          <input id="phoneInput" placeholder="Телефон" />
+          <input id="emailInput" placeholder="Email" />
+        </div>
+        <input id="addressInput" placeholder="Адреса" />
+        <div class="row">
+          <input id="telegramInput" placeholder="Telegram username без @" />
+          <input id="instagramInput" placeholder="Instagram link" />
+        </div>
+        <button onclick="saveSettings()">Зберегти налаштування</button>
+      </section>
+
+      <section class="admin-card">
+        <h2>📂 Категорії</h2>
+        <div class="row">
+          <input id="categoryInput" placeholder="Нова категорія" />
+          <button onclick="addCategory()">Додати</button>
+        </div>
+        <div id="categoryList"></div>
+      </section>
+    </div>
+
+    <div class="admin-grid" style="margin-top:20px">
+      <section class="admin-card">
+        <h2>➕ Додати / редагувати товар</h2>
+        <input id="productId" type="hidden" />
+        <input id="productName" placeholder="Назва товару" />
+        <div class="row">
+          <select id="productCategory"></select>
+          <input id="productImage" placeholder="Посилання на фото" />
+        </div>
+        <div class="row">
+          <input id="productPrice" type="number" placeholder="Ціна €" />
+          <input id="productOldPrice" type="number" placeholder="Стара ціна €" />
+        </div>
+        <input id="productStock" type="number" placeholder="Кількість на складі" />
+        <textarea id="productDescription" placeholder="Опис товару"></textarea>
+        <textarea id="productAttributes" placeholder="Атрибути, кожен з нового рядка. Наприклад:&#10;Колір: Чорний&#10;Розмір: XL&#10;Гарантія: 12 міс"></textarea>
+        <button onclick="saveProduct()">Зберегти товар</button>
+        <button class="ghost" onclick="clearProductForm()">Очистити форму</button>
+      </section>
+
+      <section class="admin-card">
+        <h2>📦 Товари</h2>
+        <div id="productList"></div>
+      </section>
+    </div>
+
+    <div class="admin-grid" style="margin-top:20px">
+      <section class="admin-card">
+        <h2>💾 Експорт / імпорт</h2>
+        <p>Можна скопіювати всі дані магазину і перенести в інший браузер.</p>
+        <textarea id="backupBox" placeholder="Тут буде JSON з даними"></textarea>
+        <button onclick="exportData()">Експортувати дані</button>
+        <button onclick="importData()">Імпортувати з поля</button>
+      </section>
+
+      <section class="admin-card">
+        <h2>🧹 Скидання</h2>
+        <p>Повернути стандартні товари, категорії та контакти.</p>
+        <button class="danger" onclick="resetStore()">Скинути магазин</button>
+      </section>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    function initAdmin(){ fillSettings(); renderAdminCategories(); renderCategorySelect(); renderAdminProducts(); }
+    function fillSettings(){ const s=loadData().settings; shopNameInput.value=s.shopName; heroTitleInput.value=s.heroTitle; heroTextInput.value=s.heroText; phoneInput.value=s.phone; emailInput.value=s.email; addressInput.value=s.address; telegramInput.value=s.telegram; instagramInput.value=s.instagram; }
+    function saveSettings(){ const data=loadData(); data.settings={shopName:shopNameInput.value,heroTitle:heroTitleInput.value,heroText:heroTextInput.value,phone:phoneInput.value,email:emailInput.value,address:addressInput.value,telegram:telegramInput.value.replace('@',''),instagram:instagramInput.value}; saveData(data); alert('Налаштування збережено'); }
+    function renderAdminCategories(){ const data=loadData(); categoryList.innerHTML=data.categories.map((c,i)=>`<p><span class="pill">${c}</span> <button class="danger" onclick="deleteCategory(${i})">Видалити</button></p>`).join(''); }
+    function addCategory(){ const name=categoryInput.value.trim(); if(!name) return; const data=loadData(); if(!data.categories.includes(name)) data.categories.push(name); saveData(data); categoryInput.value=''; renderAdminCategories(); renderCategorySelect(); }
+    function deleteCategory(i){ const data=loadData(); if(!confirm('Видалити категорію?')) return; data.categories.splice(i,1); saveData(data); renderAdminCategories(); renderCategorySelect(); renderAdminProducts(); }
+    function renderCategorySelect(){ const data=loadData(); productCategory.innerHTML=data.categories.map(c=>`<option>${c}</option>`).join(''); }
+    function parseAttrs(text){ const obj={}; text.split('\n').forEach(line=>{ const [k,...v]=line.split(':'); if(k && v.length) obj[k.trim()]=v.join(':').trim(); }); return obj; }
+    function attrsToText(attrs){ return Object.entries(attrs||{}).map(([k,v])=>`${k}: ${v}`).join('\n'); }
+    function saveProduct(){ const data=loadData(); const id=productId.value ? Number(productId.value) : Date.now(); const product={id,name:productName.value,category:productCategory.value,price:Number(productPrice.value||0),oldPrice:Number(productOldPrice.value||0),stock:Number(productStock.value||0),image:productImage.value,description:productDescription.value,attributes:parseAttrs(productAttributes.value)}; if(!product.name) return alert('Введіть назву товару'); const idx=data.products.findIndex(p=>p.id===id); if(idx>=0) data.products[idx]=product; else data.products.push(product); saveData(data); clearProductForm(); renderAdminProducts(); alert('Товар збережено'); }
+    function editProduct(id){ const p=loadData().products.find(x=>x.id===id); if(!p) return; productId.value=p.id; productName.value=p.name; productCategory.value=p.category; productImage.value=p.image; productPrice.value=p.price; productOldPrice.value=p.oldPrice||''; productStock.value=p.stock||''; productDescription.value=p.description||''; productAttributes.value=attrsToText(p.attributes); scrollTo({top:0,behavior:'smooth'}); }
+    function deleteProduct(id){ const data=loadData(); if(!confirm('Видалити товар?')) return; data.products=data.products.filter(p=>p.id!==id); saveData(data); renderAdminProducts(); }
+    function clearProductForm(){ productId.value=''; productName.value=''; productImage.value=''; productPrice.value=''; productOldPrice.value=''; productStock.value=''; productDescription.value=''; productAttributes.value=''; }
+    function renderAdminProducts(){ const data=loadData(); productList.innerHTML=data.products.map(p=>`<div class="list-item"><img src="${p.image}" alt=""><div><b>${p.name}</b><br><span>${p.category} · ${p.price} € · склад ${p.stock||0}</span></div><div><button onclick="editProduct(${p.id})">✏️</button><button class="danger" onclick="deleteProduct(${p.id})">🗑️</button></div></div>`).join(''); }
+    function exportData(){ backupBox.value=JSON.stringify(loadData(),null,2); backupBox.select(); }
+    function importData(){ try{ const data=JSON.parse(backupBox.value); saveData(data); initAdmin(); alert('Дані імпортовано'); }catch{ alert('Помилка JSON'); } }
+    function resetStore(){ if(!confirm('Скинути всі дані?')) return; localStorage.removeItem(STORE_KEY); location.reload(); }
+    initAdmin();
+  </script>
+</body>
+</html>
