@@ -7,7 +7,17 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="admin-body">
-  <div class="admin-wrap">
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <h1>🔐 Вхід в адмінку</h1>
+      <p>Введіть пароль адміністратора.</p>
+      <input id="adminPassword" type="password" placeholder="Пароль" onkeydown="if(event.key==='Enter') loginAdmin()" />
+      <button onclick="loginAdmin()">Увійти</button>
+      <p class="small-note">Стандартний пароль: <b>admin123</b>. Його можна змінити у файлі admin.html.</p>
+    </div>
+  </div>
+
+  <div id="adminPanel" class="admin-wrap" style="display:none">
     <section class="admin-hero">
       <div>
         <h1>⚙️ Адмін-панель магазину</h1>
@@ -55,17 +65,17 @@
         <input id="productName" placeholder="Назва товару" />
         <div class="row">
           <select id="productCategory"></select>
-          <input id="productImage" placeholder="Посилання на фото" />
+          <input id="productImage" placeholder="Фото: посилання або images/nazva.jpg" />
         </div>
+        <p class="small-note">Фото можна вставити як пряме посилання на картинку або завантажити фото в GitHub у папку <b>images</b> і тут написати, наприклад: <b>images/phone.jpg</b></p>
         <div class="row">
-          <input id="productPrice" type="number" placeholder="Ціна €" />
-          <input id="productOldPrice" type="number" placeholder="Стара ціна €" />
+          <input id="productPrice" type="number" placeholder="Ціна ₴" />
+          <input id="productOldPrice" type="number" placeholder="Стара ціна ₴" />
         </div>
         <input id="productStock" type="number" placeholder="Кількість на складі" />
         <textarea id="productDescription" placeholder="Опис товару"></textarea>
         <textarea id="productAttributes" placeholder="Атрибути, кожен з нового рядка. Наприклад:&#10;Колір: Чорний&#10;Розмір: XL&#10;Гарантія: 12 міс"></textarea>
         <button onclick="saveProduct()">Зберегти товар</button>
-        <button class="ghost" onclick="clearProductForm()">Очистити форму</button>
       </section>
 
       <section class="admin-card">
@@ -93,10 +103,28 @@
 
   <script src="script.js"></script>
   <script>
+    const ADMIN_PASSWORD = 'admin123';
+    function loginAdmin(){
+      if(adminPassword.value === ADMIN_PASSWORD){
+        sessionStorage.setItem('admin_ok','yes');
+        loginScreen.style.display='none';
+        adminPanel.style.display='block';
+        initAdmin();
+      } else {
+        alert('Невірний пароль');
+      }
+    }
+    function checkAdmin(){
+      if(sessionStorage.getItem('admin_ok') === 'yes'){
+        loginScreen.style.display='none';
+        adminPanel.style.display='block';
+        initAdmin();
+      }
+    }
     function initAdmin(){ fillSettings(); renderAdminCategories(); renderCategorySelect(); renderAdminProducts(); }
     function fillSettings(){ const s=loadData().settings; shopNameInput.value=s.shopName; heroTitleInput.value=s.heroTitle; heroTextInput.value=s.heroText; phoneInput.value=s.phone; emailInput.value=s.email; addressInput.value=s.address; telegramInput.value=s.telegram; instagramInput.value=s.instagram; }
     function saveSettings(){ const data=loadData(); data.settings={shopName:shopNameInput.value,heroTitle:heroTitleInput.value,heroText:heroTextInput.value,phone:phoneInput.value,email:emailInput.value,address:addressInput.value,telegram:telegramInput.value.replace('@',''),instagram:instagramInput.value}; saveData(data); alert('Налаштування збережено'); }
-    function renderAdminCategories(){ const data=loadData(); categoryList.innerHTML=data.categories.map((c,i)=>`<p><span class="pill">${c}</span> <button class="danger" onclick="deleteCategory(${i})">Видалити</button></p>`).join(''); }
+    function renderAdminCategories(){ const data=loadData(); categoryList.innerHTML=data.categories.map((c,i)=>`<p><span class="pill">${c}</span> <button class="danger small-btn" onclick="deleteCategory(${i})">Видалити</button></p>`).join(''); }
     function addCategory(){ const name=categoryInput.value.trim(); if(!name) return; const data=loadData(); if(!data.categories.includes(name)) data.categories.push(name); saveData(data); categoryInput.value=''; renderAdminCategories(); renderCategorySelect(); }
     function deleteCategory(i){ const data=loadData(); if(!confirm('Видалити категорію?')) return; data.categories.splice(i,1); saveData(data); renderAdminCategories(); renderCategorySelect(); renderAdminProducts(); }
     function renderCategorySelect(){ const data=loadData(); productCategory.innerHTML=data.categories.map(c=>`<option>${c}</option>`).join(''); }
@@ -106,11 +134,11 @@
     function editProduct(id){ const p=loadData().products.find(x=>x.id===id); if(!p) return; productId.value=p.id; productName.value=p.name; productCategory.value=p.category; productImage.value=p.image; productPrice.value=p.price; productOldPrice.value=p.oldPrice||''; productStock.value=p.stock||''; productDescription.value=p.description||''; productAttributes.value=attrsToText(p.attributes); scrollTo({top:0,behavior:'smooth'}); }
     function deleteProduct(id){ const data=loadData(); if(!confirm('Видалити товар?')) return; data.products=data.products.filter(p=>p.id!==id); saveData(data); renderAdminProducts(); }
     function clearProductForm(){ productId.value=''; productName.value=''; productImage.value=''; productPrice.value=''; productOldPrice.value=''; productStock.value=''; productDescription.value=''; productAttributes.value=''; }
-    function renderAdminProducts(){ const data=loadData(); productList.innerHTML=data.products.map(p=>`<div class="list-item"><img src="${p.image}" alt=""><div><b>${p.name}</b><br><span>${p.category} · ${p.price} € · склад ${p.stock||0}</span></div><div><button onclick="editProduct(${p.id})">✏️</button><button class="danger" onclick="deleteProduct(${p.id})">🗑️</button></div></div>`).join(''); }
+    function renderAdminProducts(){ const data=loadData(); productList.innerHTML=data.products.map(p=>`<div class="list-item"><img src="${p.image}" alt=""><div><b>${p.name}</b><br><span>${p.category} · ${p.price} ₴ · склад ${p.stock||0}</span></div><div><button class="small-btn" onclick="editProduct(${p.id})">✏️</button><button class="danger small-btn" onclick="deleteProduct(${p.id})">🗑️</button></div></div>`).join(''); }
     function exportData(){ backupBox.value=JSON.stringify(loadData(),null,2); backupBox.select(); }
     function importData(){ try{ const data=JSON.parse(backupBox.value); saveData(data); initAdmin(); alert('Дані імпортовано'); }catch{ alert('Помилка JSON'); } }
     function resetStore(){ if(!confirm('Скинути всі дані?')) return; localStorage.removeItem(STORE_KEY); location.reload(); }
-    initAdmin();
+    checkAdmin();
   </script>
 </body>
 </html>
