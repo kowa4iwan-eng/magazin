@@ -4,31 +4,56 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BOBRO Shop</title>
-  <meta name="description" content="Інтернет-магазин BOBRO Shop" />
+  <meta name="description" content="Сучасний інтернет-магазин BOBRO Shop" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="header">
-    <div class="logo">🛒 BOBRO Shop</div>
+    <a class="logo" href="#top">🛒 <span id="shopName">BOBRO Shop</span></a>
+    <nav class="nav">
+      <a href="#catalog">Каталог</a>
+      <a href="#contacts">Контакти</a>
+      <a href="admin.html">Адмін</a>
+    </nav>
     <button class="cart-btn" onclick="toggleCart()">Кошик: <span id="cartCount">0</span></button>
   </header>
 
-  <section class="hero">
+  <section class="hero" id="top">
     <div class="hero-content">
-      <span class="badge">Магазин на GitHub Pages</span>
-      <h1>Сучасний інтернет-магазин</h1>
-      <p>Каталог товарів, пошук, кошик і швидке оформлення замовлення.</p>
+      <span class="badge">Premium online shop</span>
+      <h1 id="heroTitle">Сучасний інтернет-магазин</h1>
+      <p id="heroText">Каталог, категорії, атрибути, кошик і швидке оформлення замовлення.</p>
+      <div class="hero-actions">
+        <a class="primary-link" href="#catalog">Дивитися товари</a>
+        <a class="secondary-link" href="admin.html">Відкрити адмін-панель</a>
+      </div>
       <input type="text" id="searchInput" placeholder="Пошук товару..." oninput="renderProducts()" />
     </div>
   </section>
 
-  <main>
+  <main id="catalog">
     <section class="section-title">
-      <h2>Популярні товари</h2>
-      <p>Виберіть товар і додайте його в кошик.</p>
+      <h2>Каталог товарів</h2>
+      <p>Фільтруйте за категоріями, шукайте товари і додавайте в кошик.</p>
     </section>
+
+    <div id="categoryFilters" class="filters"></div>
     <div id="products" class="products"></div>
   </main>
+
+  <section class="contacts" id="contacts">
+    <div>
+      <span class="badge dark">Контакти</span>
+      <h2>Звʼяжіться з нами</h2>
+      <p id="contactAddress">Bratislava, Slovakia</p>
+    </div>
+    <div class="contact-grid">
+      <a id="contactPhone" href="tel:+421900000000">+421 900 000 000</a>
+      <a id="contactEmail" href="mailto:info@example.com">info@example.com</a>
+      <a id="contactTelegram" href="https://t.me/telegram" target="_blank">Telegram</a>
+      <a id="contactInstagram" href="#" target="_blank">Instagram</a>
+    </div>
+  </section>
 
   <div id="cartPanel" class="cart-panel">
     <div class="cart-box">
@@ -47,7 +72,7 @@
   </div>
 
   <footer>
-    <p>© 2026 BOBRO Shop. Зроблено на GitHub Pages.</p>
+    <p>© 2026 <span id="footerShopName">BOBRO Shop</span>. Зроблено на GitHub Pages.</p>
   </footer>
 
   <script src="script.js"></script>
